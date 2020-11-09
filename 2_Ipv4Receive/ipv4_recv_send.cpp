@@ -1,22 +1,20 @@
+/*
+* THIS FILE IS FOR IP TEST
+*/
+// system support
 #include "sysInclude.h"
-#include "stdlib.h"
-#include "string.h"
-extern void ip_DiscardPkt(char *pBuffer,int type);
 
-extern void ip_SendtoLower(char *pBuffer,int length);
+extern void ip_DiscardPkt(char* pBuffer,int type);
+
+extern void ip_SendtoLower(char*pBuffer,int length);
 
 extern void ip_SendtoUp(char *pBuffer,int length);
 
 extern unsigned int getIpv4Address();
 
-// STUD_IP_TEST_CHECKSUM_ERROR      校验和出错
-// STUD_IP_TEST_TTL_ERROR           TTL 值出错
-// STUD_IP_TEST_VERSION_ERROR       IP 版本号错
-// STUD_IP_TEST_HEADLEN_ERROR       头部长度错
-// STUD_IP_TEST_DESTINATION_ERROR   目的地址错
-
 // implemented by students
-//计算校验和
+
+
 unsigned int getCheckSum(const char* pBuffer,unsigned int IHL){
     int len = IHL * 4;//头部的字节长度
     unsigned int sum = 0;
@@ -31,7 +29,7 @@ unsigned int getCheckSum(const char* pBuffer,unsigned int IHL){
 
     return (~sum)&0xFFFF;
 }
-bool check_packet(const char* pBuffer){
+bool check_packet(char* pBuffer){
     unsigned int version = (pBuffer[0] >> 4) & 0xF;
     if(version != 4){
         ip_DiscardPkt(pBuffer, STUD_IP_TEST_VERSION_ERROR);
@@ -48,20 +46,22 @@ bool check_packet(const char* pBuffer){
         return false;
     }
     unsigned int destAddr = ntohl(*(unsigned int*)(pBuffer + 16));
-
+	
     if(destAddr != getIpv4Address()){
         ip_DiscardPkt(pBuffer, STUD_IP_TEST_DESTINATION_ERROR);
         return false;
     }
-    unsigned int headerCheckSum = (*(unsigned int*)(pBuffer + 8)) & 0xFFFF;
+    unsigned int headerCheckSum = (*(unsigned short*)(pBuffer + 10)) & 0xFFFF;
     if(headerCheckSum != getCheckSum(pBuffer, IHL)){
         ip_DiscardPkt(pBuffer, STUD_IP_TEST_CHECKSUM_ERROR);
         return false;
     }
     return true;
 }
-int stud_ip_recv(char *pBuffer, unsigned short length){
-    if(check_packet(pBuffer)){
+
+int stud_ip_recv(char *pBuffer,unsigned short length)
+{
+	if(check_packet(pBuffer)){
         ip_SendtoUp(pBuffer, length);
         return 0;
     }
@@ -69,9 +69,10 @@ int stud_ip_recv(char *pBuffer, unsigned short length){
         return 1;
     }
 }
+
 int stud_ip_Upsend(char *pBuffer,unsigned short len,unsigned int srcAddr,
-				   unsigned int dstAddr,byte protocol,byte ttl){
-    int i;
+				   unsigned int dstAddr,byte protocol,byte ttl)
+{
     char* packet = (char*) malloc(len + 20);
     memset(packet, 0, len + 20);
     packet[0] = 0x45;//version 4, IHL 5
