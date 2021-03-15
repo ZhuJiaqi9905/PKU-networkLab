@@ -16,11 +16,11 @@ extern unsigned int getIpv4Address( );
 // implemented by students
 
 struct Node{
-    Node* child[10];
+    Node* child[2];
     bool flag;
     unsigned int nexthop;
     Node(){
-        for(int i = 0; i < 10; ++i){
+        for(int i = 0; i < 2; ++i){
             child[i] = NULL;
         }
         flag = false;
@@ -36,7 +36,7 @@ struct TrieTree{
         deleteNode(root);
     }
     void deleteNode(Node* nd){
-        for(int i = 0; i < 10; ++i){
+        for(int i = 0; i < 2; ++i){
             if(nd->child[i] != NULL){
                 deleteNode(nd->child[i]);
             }
@@ -47,8 +47,8 @@ struct TrieTree{
     void add(unsigned int prefix, unsigned int nexthop){
         stack<unsigned int> stk;
         while(prefix > 0){
-            stk.push(prefix % 10);
-            prefix = prefix / 10;
+            stk.push(prefix % 2);
+            prefix = prefix / 2;
         }
         Node* nd = this->root;
         while(!stk.empty()){
@@ -64,8 +64,8 @@ struct TrieTree{
     bool getNexthop(unsigned int dest, unsigned int& nexthop){
         stack<unsigned int> stk;
         while(dest > 0){
-            stk.push(dest % 10);
-            dest = dest / 10;
+            stk.push(dest % 2);
+            dest = dest / 2;
         }
         Node* nd = this->root;
         bool find = false;
